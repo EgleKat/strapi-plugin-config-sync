@@ -1,6 +1,5 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { Button } from '@strapi/design-system';
 import RDV, { DiffMethod } from 'react-diff-viewer-continued';
 import { useIntl } from 'react-intl';
 import { getFetchClient, useNotification } from '@strapi/strapi/admin';
@@ -22,6 +21,7 @@ if (typeof RDV.default !== 'undefined') {
 }
 
 import {
+  Button,
   Modal,
   Grid,
   Typography,
@@ -49,7 +49,7 @@ const ConfigDiff = ({ oldValue, newValue, configName, trigger }) => {
         </Modal.Header>
         <Modal.Body>
           <Grid.Root paddingBottom={4} style={{ textAlign: 'center' }}>
-          <Grid.Item col={6} style={{ justifyContent: 'center' }}>
+            <Grid.Item col={6} style={{ justifyContent: 'center' }}>
               <Typography variant="delta" style={commonHeadingStyle}>{formatMessage({ id: 'config-sync.ConfigDiff.SyncDirectory' })}
               </Typography>
               <ConfirmModal
@@ -60,7 +60,7 @@ const ConfigDiff = ({ oldValue, newValue, configName, trigger }) => {
             </Grid.Item>
             <Grid.Item col={6} style={{ justifyContent: 'center' }}>
               <Typography variant="delta" style={commonHeadingStyle}>
-              {formatMessage({ id: 'config-sync.ConfigDiff.Database' })}
+                {formatMessage({ id: 'config-sync.ConfigDiff.Database' })}
               </Typography>
               <ConfirmModal
                 type="export"
