@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useIntl } from 'react-intl';
 import { isEmpty } from 'lodash';
 import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
 
 import {
   Table,
@@ -13,8 +14,11 @@ import {
   Checkbox,
   Loader,
   Flex,
+  Box,
+  TextInput,
+  IconButton,
 } from '@strapi/design-system';
-import { CaretDown, CaretUp } from '@strapi/icons';
+import { CaretDown, CaretUp, Search, Cross } from '@strapi/icons';
 
 import ConfigDiff from '../ConfigDiff';
 import FirstExport from '../FirstExport';
@@ -22,6 +26,13 @@ import NoChanges from '../NoChanges';
 import ConfigListRow from './ConfigListRow';
 import { setConfigPartialDiffInState } from '../../state/actions/Config';
 
+const SearchBox = styled(Box)`
+  width: 100%;
+
+  @media (min-width: 768px) {
+    width: 40%;
+  }
+`;
 
 const ConfigList = ({ diff, isLoading }) => {
   const [originalConfig, setOriginalConfig] = useState({});
@@ -31,6 +42,7 @@ const ConfigList = ({ diff, isLoading }) => {
   const [checkedItems, setCheckedItems] = useState([]);
   const [sortBy, setSortBy] = useState('configName');
   const [sortOrder, setSortOrder] = useState('asc');
+  const [searchQuery, setSearchQuery] = useState('');
   const dispatch = useDispatch();
   const { formatMessage } = useIntl();
 
@@ -103,7 +115,13 @@ const ConfigList = ({ diff, isLoading }) => {
   const sortedRows = useMemo(() => {
     const rowsWithIndex = rows.map((row, originalIndex) => ({ ...row, originalIndex }));
 
-    return rowsWithIndex.sort((a, b) => {
+    const filteredRows = searchQuery
+      ? rowsWithIndex.filter((row) => (
+        `${row.configType}.${row.configName}`.toLowerCase().includes(searchQuery.toLowerCase())
+      ))
+      : rowsWithIndex;
+
+    return filteredRows.sort((a, b) => {
       const aValue = (a[sortBy] || '').toLowerCase();
       const bValue = (b[sortBy] || '').toLowerCase();
 
@@ -111,7 +129,7 @@ const ConfigList = ({ diff, isLoading }) => {
       if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [rows, sortBy, sortOrder]);
+  }, [rows, sortBy, sortOrder, searchQuery]);
 
   if (isLoading) {
     return (
@@ -139,7 +157,25 @@ const ConfigList = ({ diff, isLoading }) => {
 
   return (
     <div>
-      <Table colCount={4} rowCount={rows.length + 1}>
+      <SearchBox paddingBottom={4}>
+        <TextInput
+          startAction={<Search />}
+          endAction={searchQuery ? (
+            <IconButton
+              label={formatMessage({ id: 'config-sync.ConfigList.ClearSearch' })}
+              onClick={() => setSearchQuery('')}
+              variant="ghost"
+            >
+              <Cross />
+            </IconButton>
+          ) : null}
+          aria-label={formatMessage({ id: 'config-sync.ConfigList.Search' })}
+          placeholder={formatMessage({ id: 'config-sync.ConfigList.Search' })}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </SearchBox>
+      <Table colCount={4} rowCount={sortedRows.length + 1}>
         <Thead>
           <Tr>
             <Th>
